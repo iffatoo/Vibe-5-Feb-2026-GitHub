@@ -1,1 +1,314 @@
-/* Add styles here */
+:root {
+  /* Light theme variables */
+  --bg-color: #f4f7f6;
+  --text-color: #333;
+  --header-bg: #283747;
+  --header-text: #ffffff;
+  --card-bg: #ffffff;
+  --card-shadow: rgba(0,0,0,0.1);
+  --seat-grid-bg: #fafafa;
+  --seat-border: #e0e0e0;
+  --seat-available-bg: #d4edda;
+  --seat-available-border: #28a745;
+  --seat-available-text: #155724;
+  --seat-booked-bg: #f8d7da;
+  --seat-booked-border: #dc3545;
+  --seat-booked-text: #721c24;
+  --seat-booked-by-me-bg: #ffeeba;
+  --seat-booked-by-me-border: #ffc107;
+  --seat-booked-by-me-text: #856404;
+  --seat-selected-bg: #cfe2ff;
+  --seat-selected-border: #007bff;
+  --form-section-bg: #f8f9fa;
+  --form-section-border: #e9ecef;
+  --form-label-color: #555;
+  --input-border: #ced4da;
+  --button-primary-bg: #007bff;
+  --button-primary-hover-bg: #0056b3;
+  --button-cancel-bg: #dc3545;
+  --button-cancel-hover-bg: #c82333;
+  --button-edit-bg: #ffc107;
+  --button-edit-hover-bg: #e0a800;
+  --my-bookings-item-bg: #e9ecef;
+  --date-highlight-color: #007bff;
+}
+
+body.dark-mode {
+  /* Dark theme variables */
+  --bg-color: #2c3e50;
+  --text-color: #ecf0f1;
+  --header-bg: #34495e;
+  --header-text: #ecf0f1;
+  --card-bg: #3b506e;
+  --card-shadow: rgba(0,0,0,0.3);
+  --seat-grid-bg: #4a617c;
+  --seat-border: #5b7c99;
+  --seat-available-bg: #4CAF50; /* Green */
+  --seat-available-border: #388E3C;
+  --seat-available-text: #e8f5e9;
+  --seat-booked-bg: #f44336; /* Red */
+  --seat-booked-border: #d32f2f;
+  --seat-booked-text: #ffebee;
+  --seat-booked-by-me-bg: #FFC107; /* Amber */
+  --seat-booked-by-me-border: #FFA000;
+  --seat-booked-by-me-text: #424242;
+  --seat-selected-bg: #2196F3; /* Blue */
+  --seat-selected-border: #1976D2;
+  --form-section-bg: #4a617c;
+  --form-section-border: #5b7c99;
+  --form-label-color: #ecf0f1;
+  --input-border: #5b7c99;
+  --button-primary-bg: #3498db;
+  --button-primary-hover-bg: #2980b9;
+  --button-cancel-bg: #e74c3c;
+  --button-cancel-hover-bg: #c0392b;
+  --button-edit-bg: #f39c12;
+  --button-edit-hover-bg: #e67e22;
+  --my-bookings-item-bg: #4a617c;
+  --date-highlight-color: #92bce6;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.main-header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  padding: 1rem 0;
+  text-align: center;
+  box-shadow: 0 2px 5px var(--card-shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.booking-card {
+  background-color: var(--card-bg);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px var(--card-shadow);
+  padding: 2rem;
+  max-width: 900px;
+  width: 100%;
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.card-header h2 {
+  color: var(--text-color);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+}
+
+.card-header p {
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+#tomorrowDate, #myBookingsDate {
+  font-weight: bold;
+  color: var(--date-highlight-color);
+}
+
+.seat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 10px;
+  margin-bottom: 2rem;
+  border: 1px solid var(--seat-border);
+  padding: 15px;
+  border-radius: 8px;
+  background-color: var(--seat-grid-bg);
+}
+
+.seat {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e0e0e0; /* Default neutral background for seat */
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  box-shadow: 0 2px 5px var(--card-shadow);
+  color: var(--text-color); /* Ensure text color adapts */
+}
+
+.seat.available {
+  background-color: var(--seat-available-bg);
+  border: 1px solid var(--seat-available-border);
+  color: var(--seat-available-text);
+}
+
+.seat.available:hover {
+  background-color: #c3e6cb; /* Slightly different hover for light theme */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--card-shadow);
+}
+.dark-mode .seat.available:hover {
+    background-color: #69F0AE; /* Darker hover for dark theme */
+}
+
+.seat.booked {
+  background-color: var(--seat-booked-bg);
+  border: 1px solid var(--seat-booked-border);
+  color: var(--seat-booked-text);
+  cursor: not-allowed;
+}
+
+.seat.booked-by-me {
+  background-color: var(--seat-booked-by-me-bg);
+  border: 1px solid var(--seat-booked-by-me-border);
+  color: var(--seat-booked-by-me-text);
+  cursor: pointer;
+}
+
+.seat.selected {
+  background-color: var(--seat-selected-bg);
+  border: 2px solid var(--seat-selected-border);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.booking-form-section, .my-bookings-section {
+  background-color: var(--form-section-bg);
+  border: 1px solid var(--form-section-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.booking-form-section h3, .my-bookings-section h3 {
+  color: var(--text-color);
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--input-border);
+  padding-bottom: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: var(--form-label-color);
+}
+
+.form-group input[type="text"] {
+  width: calc(100% - 22px);
+  padding: 10px;
+  border: 1px solid var(--input-border);
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  background-color: var(--card-bg); /* Input background should also change */
+  color: var(--text-color); /* Input text color */
+}
+
+.book-button, .edit-button, .cancel-button {
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+  margin-top: 1rem;
+}
+
+.book-button {
+  background-color: var(--button-primary-bg);
+}
+
+.book-button:hover {
+  background-color: var(--button-primary-hover-bg);
+}
+
+.book-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.my-bookings-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.my-bookings-section li {
+  background-color: var(--my-bookings-item-bg);
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-color);
+}
+
+.my-bookings-section li button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: 0.9rem;
+}
+
+.edit-button {
+  background-color: var(--button-edit-bg);
+  color: var(--text-color);
+}
+.edit-button:hover {
+  background-color: var(--button-edit-hover-bg);
+}
+
+.cancel-button {
+  background-color: var(--button-cancel-bg);
+}
+.cancel-button:hover {
+  background-color: var(--button-cancel-hover-bg);
+}
+
+/* Theme Toggle Button Style */
+.theme-toggle {
+    background-color: var(--button-primary-bg);
+    color: var(--header-text);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.theme-toggle:hover {
+    background-color: var(--button-primary-hover-bg);
+}
