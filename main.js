@@ -1,6 +1,23 @@
 const SEAT_COUNT = 20;
-const STORAGE_KEY_PREFIX = 'deskBookings_'; // Prefix for localStorage keys
 const THEME_STORAGE_KEY = 'themePreference';
+
+// Firebase Configuration (Replace with your actual config)
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+const bookingsCollection = db.collection('bookings');
+
 
 // DOM Elements
 const tomorrowDateEl = document.getElementById('tomorrowDate');
@@ -35,17 +52,6 @@ function getTomorrowDateKey() {
   return tomorrow.toISOString().slice(0, 10); // YYYY-MM-DD
 }
 
-function loadBookings() {
-  const dateKey = getTomorrowDateKey();
-  const storedBookings = localStorage.getItem(STORAGE_KEY_PREFIX + dateKey);
-  currentBookings = storedBookings ? JSON.parse(storedBookings) : {};
-}
-
-function saveBookings() {
-  const dateKey = getTomorrowDateKey();
-  localStorage.setItem(STORAGE_KEY_PREFIX + dateKey, JSON.stringify(currentBookings));
-}
-
 function generateSeatId(index) {
   return `D${index + 1}`; // Desk 1, Desk 2, etc.
 }
@@ -77,6 +83,54 @@ function loadTheme() {
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'light'; // Default to light
     setTheme(savedTheme);
 }
+
+// --- Firestore Operations ---
+
+async function addOrUpdateBooking(seatId, bookingData) {
+    const dateKey = getTomorrowDateKey();
+    const docId = `${dateKey}-${seatId}`;
+    try {
+        await bookingsCollection.doc(docId).set(bookingData);
+        console.log(`Booking for ${seatId} on ${dateKey} saved to Firestore.`);
+    } catch (error) {
+        console.error("Error writing document: ", error);
+        alert("Error saving booking. Please try again.");
+    }
+}
+
+async function deleteBooking(seatId) {
+    const dateKey = getTomorrowDateKey();
+    const docId = `${dateKey}-${seatId}`;
+    try {
+        await bookingsCollection.doc(docId).delete();
+        console.log(`Booking for ${seatId} on ${dateKey} deleted from Firestore.`);
+    } catch (error) {
+        console.error("Error removing document: ", error);
+        alert("Error canceling booking. Please try again.");
+    }
+}
+
+function listenForBookings() {
+    const dateKey = getTomorrowDateKey();
+    bookingsCollection.where('dateKey', '==', dateKey)
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach(change => {
+                const booking = change.doc.data();
+                const seatId = booking.seatNumber;
+                if (change.type === "added" || change.type === "modified") {
+                    currentBookings[seatId] = booking;
+                }
+                if (change.type === "removed") {
+                    delete currentBookings[seatId];
+                }
+            });
+            renderAll(); // Re-render whenever there's a change
+        }, (error) => {
+            console.error("Error listening to bookings: ", error);
+            alert("Error loading bookings in real-time.");
+        });
+}
+
 
 // --- Render Functions ---
 
@@ -165,7 +219,7 @@ function handleSeatClick(seatId) {
   renderSeats(); // Re-render to update highlighting
 }
 
-function handleBookSeat() {
+async function handleBookSeat() {
   const user = userNameInput.value.trim();
   if (!user) {
     alert("Please enter your name.");
@@ -189,7 +243,7 @@ function handleBookSeat() {
     // If user has an existing booking and selects a different seat, it's an edit
     const confirmEdit = confirm(`You already have Desk ${existingBooking.seatNumber} booked. Do you want to change your booking to Desk ${selectedSeat}?`);
     if (confirmEdit) {
-      delete currentBookings[existingBooking.seatNumber]; // Cancel old booking
+      await deleteBooking(existingBooking.seatNumber); // Cancel old booking
     } else {
       selectedSeat = null;
       selectedSeatDisplay.value = '';
@@ -206,17 +260,18 @@ function handleBookSeat() {
     return;
   }
 
-
-  currentBookings[selectedSeat] = {
+  const bookingData = {
     seatNumber: selectedSeat,
     userName: user,
+    dateKey: getTomorrowDateKey(),
     bookingId: `${getTomorrowDateKey()}-${selectedSeat}-${Date.now()}` // Simple unique ID
   };
-  saveBookings();
+  await addOrUpdateBooking(selectedSeat, bookingData);
+  
   selectedSeat = null; // Clear selection
   selectedSeatDisplay.value = '';
   selectedSeatInput.value = '';
-  renderAll(); // Re-render everything
+  // renderAll() is called by the Firestore listener
   alert(`Desk ${selectedSeat} successfully booked for ${user}!`);
 }
 
@@ -230,14 +285,13 @@ function handleEditBooking(seatToEdit) {
 }
 
 
-function handleCancelBooking(seatToCancel) {
+async function handleCancelBooking(seatToCancel) {
   const booking = currentBookings[seatToCancel];
   if (booking && booking.userName === currentUserName) {
     const confirmCancel = confirm(`Are you sure you want to cancel your booking for Desk ${seatToCancel}?`);
     if (confirmCancel) {
-      delete currentBookings[seatToCancel];
-      saveBookings();
-      renderAll();
+      await deleteBooking(seatToCancel);
+      // renderAll() is called by the Firestore listener
       alert(`Booking for Desk ${seatToCancel} cancelled.`);
     }
   } else {
@@ -251,7 +305,7 @@ function init() {
   getUserName(); // Prompt for user name on load
   tomorrowDateEl.textContent = tomorrowDate;
   myBookingsDateEl.textContent = tomorrowDate; // Set date for "My Bookings"
-  loadBookings();
+  listenForBookings(); // Start real-time listener for bookings
   loadTheme(); // Load theme preference
   renderAll();
 

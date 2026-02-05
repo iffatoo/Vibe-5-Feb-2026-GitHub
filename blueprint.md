@@ -7,33 +7,33 @@ This project will create a simple, interactive web-based office desk booking sys
 - **Office Desk Booking System:** Users can book, view, edit, and cancel desk bookings for the day after the current date. All data is stored locally.
 - **Dark/Light Mode Toggle:** Allows users to switch between dark and light themes, with preference saved in local storage.
 
-## Plan for Current Change: Implement Dark/Light Mode Toggle
+## Plan for Current Change: Integrate Firebase Firestore for Booking Storage
 
 ### Objective
-To provide users with the option to switch between a dark and light theme, enhancing usability and personal preference. The selected theme will persist across sessions.
+To replace local storage with Firebase Firestore for persistent and scalable storage of booking information, enabling multi-user and real-time capabilities.
 
 ### Detailed Outline of Changes
 
 #### 1. `index.html` Modifications
-- **Add Toggle UI:** Introduce a button or checkbox, preferably in the header, that will serve as the dark/light mode toggle.
+- **Add Firebase SDK Scripts:** Include the necessary Firebase SDKs (App and Firestore) via CDN links in the `<head>` or before the closing `</body>` tag.
 
-#### 2. `style.css` Modifications
-- **Define CSS Variables:** Establish CSS variables for colors to manage themes effectively.
-- **Light Theme (Default):** Define default color variables for the light theme.
-- **Dark Theme:** Create a `.dark-mode` class (e.g., on the `body` or `html` element) that overrides the CSS variables for a dark theme.
+#### 2. `main.js` Modifications
+- **Firebase Initialization:** Add Firebase configuration and initialize the app and Firestore instance.
+- **Data Migration (Conceptual):** Explain the process of migrating from local storage to Firestore (though for a new setup, this might just involve removing old `localStorage` logic).
+- **Firestore Operations:**
+    - **`saveBooking(seatId, bookingData)`:** Function to add or update a booking in Firestore.
+    - **`deleteBooking(seatId)`:** Function to remove a booking from Firestore.
+    - **`listenForBookings()`:** Set up a real-time listener to Firestore to update `currentBookings` and re-render the UI whenever booking data changes in the database.
+- **Update Existing Functions:** Modify `loadBookings`, `saveBookings` (now `saveBooking`), `handleBookSeat`, `handleCancelBooking` to use Firestore functions instead of `localStorage`.
+- **Remove `localStorage` Booking Logic:** Remove all `localStorage` related code for booking data (keep theme preference).
+- **Error Handling:** Add basic error handling for Firestore operations.
 
-#### 3. `main.js` Modifications
-- **DOM Access:** Get references to the toggle button and the `body`/`html` element.
-- **Toggle Logic:**
-    - Add an event listener to the toggle button to switch the theme.
-    - When the toggle is activated, add/remove the `.dark-mode` class from the `body`/`html` element.
-- **Local Storage Integration:**
-    - Save the current theme preference (`'dark'` or `'light'`) to `localStorage`.
-    - On page load, check `localStorage` for a saved theme preference and apply it.
+#### 3. `style.css` Modifications
+- No direct changes are expected in `style.css` for database integration, but ensuring UI updates correctly with real-time data will be important.
 
 ### Steps
-1.  Update `blueprint.md` with the plan for dark/light mode. (**COMPLETED**)
-2.  Modify `index.html` to add the dark/light mode toggle switch.
-3.  Modify `style.css` to define theme variables and dark mode styles.
-4.  Modify `main.js` to implement the dark/light mode toggle logic and local storage persistence.
-5.  Verify the dark/light mode functionality in the browser preview.
+1.  Update `blueprint.md` with the plan for Firebase Firestore integration. (**COMPLETED**)
+2.  Modify `index.html` to include Firebase SDK scripts.
+3.  Modify `main.js` to initialize Firebase and implement Firestore operations for booking data.
+4.  Remove `localStorage` related booking logic from `main.js`.
+5.  Verify real-time booking updates and persistence with Firebase Firestore.
